@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>简报 · 每日精选</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Playfair+Display:wght@700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1814;
+      --ink-light: #4a453e;
+      --ink-faint: #8a847c;
+      --paper: #f5f0e8;
+      --paper-dark: #ede8dc;
+      --accent: #c0392b;
+      --accent-gold: #b8860b;
+      --border: #d4cfc5;
+      --serif: 'Noto Serif SC', 'Playfair Display', serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--serif);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(ellipse at 20% 0%, rgba(192,57,43,0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(184,134,11,0.04) 0%, transparent 50%);
+    }
+
+    /* MASTHEAD */
+    .masthead {
+      border-bottom: 3px double var(--ink);
+      padding: 24px 40px 16px;
+      text-align: center;
+      position: relative;
+    }
+    .masthead::before {
+      content: '';
+      display: block;
+      border-top: 1px solid var(--ink);
+      margin-bottom: 16px;
+    }
+    .masthead-title {
+      font-family: 'Playfair Display', var(--serif);
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--ink);
+    }
+    .masthead-title span {
+      color: var(--accent);
+    }
+    .masthead-subtitle {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--ink-faint);
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+    .masthead-date {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--ink-faint);
+      margin-top: 4px;
+      letter-spacing: 0.1em;
+    }
+
+    /* CONTROL PANEL */
+    .control-panel {
+      border-bottom: 1px solid var(--border);
+      background: var(--paper-dark);
+      padding: 20px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    .keyword-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    input[type="text"] {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 0.9rem;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 220px;
+    }
+    input[type="text"]:focus {
+      border-color: var(--ink);
+    }
+    input[type="text"]::placeholder {
+      color: var(--ink-faint);
+    }
+
+    .btn {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: var(--accent); border-color: var(--accent); }
+    .btn-outline {
+      background: transparent;
+      color: var(--ink);
+    }
+    .btn-outline:hover { background: var(--ink); color: var(--paper); }
+    .btn-fetch {
+      background: var(--accent);
+      border-color: var(--accent);
+      padding: 8px 24px;
+      font-size: 0.8rem;
+    }
+    .btn-fetch:hover { background: #a93226; border-color: #a93226; }
+
+    .keyword-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-width: 500px;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.05em;
+    }
+    .tag-remove {
+      cursor: pointer;
+      opacity: 0.6;
+      font-size: 0.8rem;
+      line-height: 1;
+    }
+    .tag-remove:hover { opacity: 1; }
+
+    .time-select {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 8px 12px;
+      outline: none;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+
+    /* API KEY SECTION */
+    .api-section {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .api-key-input {
+      width: 280px;
+      font-family: var(--mono) !important;
+      font-size: 0.75rem !important;
+      letter-spacing: 0.05em;
+    }
+    .api-status {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+    }
+    .api-status.ok { color: #27ae60; }
+    .api-status.err { color: var(--accent); }
+
+    /* MAIN CONTENT */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 40px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--ink);
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .section-count {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.1em;
+    }
+
+    /* NEWS CARDS */
+    .news-grid {
+      display: grid;
+      gap: 0;
+    }
+
+    .news-card {
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: start;
+      animation: fadeIn 0.4s ease both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .news-card:first-child { border-top: 1px solid var(--border); }
+
+    .news-keyword-badge {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .news-headline {
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .news-summary {
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: var(--ink-light);
+      margin-bottom: 12px;
+    }
+
+    .news-sources {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .source-link {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      color: var(--ink-faint);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .source-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    .news-meta {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.08em;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* STATES */
+    .state-empty {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--ink-faint);
+    }
+    .state-empty-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+    .state-empty-text {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      line-height: 1.8;
+    }
+
+    .state-loading {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.1em;
+    }
+
+    .error-banner {
+      background: #fdf0ef;
+      border: 1px solid var(--accent);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      line-height: 1.6;
+    }
+
+    /* SETTINGS MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,24,20,0.7);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal {
+      background: var(--paper);
+      border: 1px solid var(--ink);
+      padding: 32px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-section {
+      margin-bottom: 20px;
+    }
+    .modal-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 8px;
+    }
+    .modal-desc {
+      font-size: 0.8rem;
+      color: var(--ink-light);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .modal-desc a {
+      color: var(--accent);
+    }
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.1em;
+    }
+
+    @media (max-width: 640px) {
+      .masthead { padding: 16px 20px; }
+      .control-panel { padding: 16px 20px; }
+      .main { padding: 24px 20px; }
+      .news-card { grid-template-columns: 1fr; }
+      .news-meta { text-align: left; }
+      input[type="text"] { width: 160px; }
+      .api-key-input { width: 200px !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="masthead">
+    <div class="masthead-title">简<span>报</span></div>
+    <div class="masthead-subtitle">个人新闻聚合 · Personal News Digest</div>
+    <div class="masthead-date" id="todayDate"></div>
+  </header>
+
+  <div class="control-panel">
+    <!-- 关键词 -->
+    <div class="control-group" style="flex:1;min-width:280px">
+      <div class="control-label">关键词</div>
+      <div class="keyword-input-row">
+        <input type="text" id="kwInput" placeholder="输入关键词，回车添加" maxlength="50" />
+        <button class="btn btn-outline" onclick="addKeyword()">添加</button>
+      </div>
+      <div class="keyword-tags" id="kwTags"></div>
+    </div>
+
+    <!-- 时间范围 -->
+    <div class="control-group">
+      <div class="control-label">时间范围</div>
+      <select class="time-select" id="timeRange">
+        <option value="1">今天</option>
+        <option value="3" selected>最近3天</option>
+        <option value="7">最近1周</option>
+        <option value="14">最近2周</option>
+        <option value="30">最近1个月</option>
+      </select>
+    </div>
+
+    <!-- 获取按钮 -->
+    <div class="control-group">
+      <div class="control-label">&nbsp;</div>
+      <button class="btn btn-fetch" onclick="fetchNews()">▶ 获取新闻</button>
+    </div>
+
+    <!-- 设置 -->
+    <div class="control-group">
+      <div class="control-label">&nbsp;</div>
+      <button class="btn btn-outline" onclick="openSettings()">⚙ 设置</button>
+    </div>
+  </div>
+
+  <main class="main">
+    <div id="errorBanner" class="error-banner" style="display:none"></div>
+    <div id="newsContainer">
+      <div class="state-empty">
+        <div class="state-empty-icon">📰</div>
+        <div class="state-empty-text">
+          添加关键词，选择时间范围<br>点击「获取新闻」开始
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>简报 · 数据来源：Google News &amp; NewsAPI · 摘要由 Gemini AI 生成</footer>
+
+  <!-- 设置弹窗 -->
+  <div class="modal-overlay" id="settingsModal" onclick="closeSettingsOutside(event)">
+    <div class="modal">
+      <div class="modal-title">⚙ 设置</div>
+
+      <div class="modal-section">
+        <div class="modal-label">Gemini API Key</div>
+        <div class="modal-desc">
+          用于新闻去重和中文摘要生成。<a href="https://aistudio.google.com/app/apikey" target="_blank">点击此处免费申请</a>，选择免费套餐即可。
+        </div>
+        <div style="display:flex;gap:8px">
+          <input type="password" id="geminiKey" class="api-key-input" placeholder="AIza..." style="width:280px;font-family:monospace;font-size:0.75rem" />
+          <button class="btn btn-outline" onclick="saveApiKey()">保存</button>
+        </div>
+        <div class="api-status" id="apiStatus" style="margin-top:6px"></div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">NewsAPI Key（可选）</div>
+        <div class="modal-desc">
+          用于获取更多英文新闻来源。<a href="https://newsapi.org/register" target="_blank">点击此处免费申请</a>。不填则只使用 Google News。
+        </div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="newsapiKey" class="api-key-input" placeholder="留空则不使用" style="width:280px;font-family:monospace;font-size:0.75rem" />
+          <button class="btn btn-outline" onclick="saveNewsApiKey()">保存</button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeSettings()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ─── 状态 ───────────────────────────────────────────
+let keywords = JSON.parse(localStorage.getItem('jb_keywords') || '["Gemini","特朗普","黄金","AI"]');
+let geminiKey = localStorage.getItem('jb_gemini_key') || '';
+let newsapiKey = localStorage.getItem('jb_newsapi_key') || '';
+
+// ─── 初始化 ─────────────────────────────────────────
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('zh-CN', {
+  year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+});
+document.getElementById('kwInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addKeyword();
+});
+renderTags();
+
+function renderTags() {
+  const el = document.getElementById('kwTags');
+  el.innerHTML = keywords.map((kw, i) => `
+    <div class="tag">
+      ${kw}
+      <span class="tag-remove" onclick="removeKeyword(${i})">✕</span>
+    </div>
+  `).join('');
+}
+function addKeyword() {
+  const v = document.getElementById('kwInput').value.trim();
+  if (v && !keywords.includes(v)) {
+    keywords.push(v);
+    localStorage.setItem('jb_keywords', JSON.stringify(keywords));
+    renderTags();
+  }
+  document.getElementById('kwInput').value = '';
+}
+function removeKeyword(i) {
+  keywords.splice(i, 1);
+  localStorage.setItem('jb_keywords', JSON.stringify(keywords));
+  renderTags();
+}
+
+// ─── 设置弹窗 ────────────────────────────────────────
+function openSettings() {
+  document.getElementById('geminiKey').value = geminiKey;
+  document.getElementById('newsapiKey').value = newsapiKey;
+  document.getElementById('apiStatus').textContent = '';
+  document.getElementById('settingsModal').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+function closeSettingsOutside(e) {
+  if (e.target === document.getElementById('settingsModal')) closeSettings();
+}
+function saveApiKey() {
+  const v = document.getElementById('geminiKey').value.trim();
+  geminiKey = v;
+  localStorage.setItem('jb_gemini_key', v);
+  const st = document.getElementById('apiStatus');
+  st.textContent = v ? '✓ 已保存' : '已清除';
+  st.className = 'api-status ok';
+}
+function saveNewsApiKey() {
+  const v = document.getElementById('newsapiKey').value.trim();
+  newsapiKey = v;
+  localStorage.setItem('jb_newsapi_key', v);
+}
+
+// ─── 核心：获取新闻 ───────────────────────────────────
+async function fetchNews() {
+  if (!keywords.length) {
+    showError('请先添加至少一个关键词');
+    return;
+  }
+  if (!geminiKey) {
+    showError('请先在「设置」中填写 Gemini API Key');
+    openSettings();
+    return;
+  }
+
+  const days = parseInt(document.getElementById('timeRange').value);
+  showLoading();
+  hideError();
+
+  try {
+    // 1. 从 Google News RSS 抓取（通过 allorigins 代理）
+    let allArticles = [];
+    for (const kw of keywords) {
+      const articles = await fetchGoogleNews(kw, days);
+      allArticles = allArticles.concat(articles.map(a => ({...a, keyword: kw})));
+    }
+
+    // 2. 如果有 NewsAPI key，也抓取
+    if (newsapiKey) {
+      for (const kw of keywords) {
+        const articles = await fetchNewsAPI(kw, days);
+        allArticles = allArticles.concat(articles.map(a => ({...a, keyword: kw})));
+      }
+    }
+
+    if (!allArticles.length) {
+      showEmpty('未找到相关新闻，请尝试更换关键词或扩大时间范围');
+      return;
+    }
+
+    // 3. 用 Gemini 去重聚合生成摘要
+    const grouped = await groupAndSummarize(allArticles, days);
+    renderNews(grouped);
+
+  } catch (err) {
+    console.error(err);
+    showError('获取失败：' + err.message);
+  }
+}
+
+// ─── Google News RSS ──────────────────────────────────
+async function fetchGoogleNews(keyword, days) {
+  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=zh-CN&gl=CN&ceid=CN:zh-Hans`;
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  const res = await fetch(proxy);
+  const data = await res.json();
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(data.contents, 'text/xml');
+  const items = xml.querySelectorAll('item');
+  const cutoff = Date.now() - days * 86400000;
+  const articles = [];
+  items.forEach(item => {
+    const pubDate = new Date(item.querySelector('pubDate')?.textContent || 0);
+    if (pubDate.getTime() < cutoff) return;
+    const title = item.querySelector('title')?.textContent || '';
+    const link = item.querySelector('link')?.textContent || '';
+    const source = item.querySelector('source')?.textContent || 'Google News';
+    articles.push({ title, link, source, publishedAt: pubDate.toISOString() });
+  });
+  return articles.slice(0, 15);
+}
+
+// ─── NewsAPI ──────────────────────────────────────────
+async function fetchNewsAPI(keyword, days) {
+  const from = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(keyword)}&from=${from}&sortBy=publishedAt&pageSize=10&apiKey=${newsapiKey}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status !== 'ok') return [];
+  return (data.articles || []).map(a => ({
+    title: a.title,
+    link: a.url,
+    source: a.source?.name || 'NewsAPI',
+    publishedAt: a.publishedAt
+  }));
+}
+
+// ─── Gemini 去重聚合 ──────────────────────────────────
+async function groupAndSummarize(articles, days) {
+  // 按关键词分组
+  const byKeyword = {};
+  articles.forEach(a => {
+    if (!byKeyword[a.keyword]) byKeyword[a.keyword] = [];
+    byKeyword[a.keyword].push(a);
+  });
+
+  const results = [];
+
+  for (const [kw, arts] of Object.entries(byKeyword)) {
+    if (!arts.length) continue;
+
+    const articleList = arts.map((a, i) =>
+      `${i+1}. 标题：${a.title}\n   来源：${a.source}\n   时间：${new Date(a.publishedAt).toLocaleDateString('zh-CN')}\n   链接：${a.link}`
+    ).join('\n\n');
+
+    const prompt = `你是一个专业的新闻编辑。以下是关于关键词「${kw}」在最近${days}天内收集到的新闻列表：
+
+${articleList}
+
+请完成以下任务：
+1. 将内容相似或同一事件的新闻归为一组
+2. 对每组生成一个简洁的中文标题（15字以内）
+3. 对每组生成一段中文摘要（100-150字），概括核心事件、时间、影响
+4. 每组保留所有来源链接
+
+请严格按照以下JSON格式返回，不要有其他文字：
+[
+  {
+    "headline": "聚合标题",
+    "summary": "中文摘要内容",
+    "sources": [
+      {"name": "来源名", "url": "链接", "date": "日期"}
+    ]
+  }
+]`;
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.3, maxOutputTokens: 2048 }
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+      const clean = text.replace(/```json|```/g, '').trim();
+      const groups = JSON.parse(clean);
+      groups.forEach(g => results.push({ ...g, keyword: kw }));
+    } catch (e) {
+      // Gemini失败则直接显示原始标题
+      arts.forEach(a => results.push({
+        headline: a.title,
+        summary: '',
+        sources: [{ name: a.source, url: a.link, date: new Date(a.publishedAt).toLocaleDateString('zh-CN') }],
+        keyword: kw
+      }));
+    }
+  }
+
+  return results;
+}
+
+// ─── 渲染 ─────────────────────────────────────────────
+function renderNews(groups) {
+  const container = document.getElementById('newsContainer');
+  if (!groups.length) {
+    showEmpty('未找到相关新闻');
+    return;
+  }
+
+  const timeLabel = document.getElementById('timeRange').options[document.getElementById('timeRange').selectedIndex].text;
+
+  container.innerHTML = `
+    <div class="section-header">
+      <div class="section-title">新闻摘要</div>
+      <div class="section-count">${timeLabel} · 共 ${groups.length} 条</div>
+    </div>
+    <div class="news-grid">
+      ${groups.map((g, i) => `
+        <div class="news-card" style="animation-delay:${i * 0.05}s">
+          <div>
+            <div class="news-keyword-badge"># ${g.keyword}</div>
+            <div class="news-headline">${g.headline}</div>
+            ${g.summary ? `<div class="news-summary">${g.summary}</div>` : ''}
+            <div class="news-sources">
+              ${g.sources.map(s => `
+                <a class="source-link" href="${s.url}" target="_blank" rel="noopener">
+                  ${s.name}${s.date ? ' · ' + s.date : ''}
+                </a>
+              `).join('')}
+            </div>
+          </div>
+          <div class="news-meta">${g.sources.length} 个来源</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ─── 工具函数 ─────────────────────────────────────────
+function showLoading() {
+  document.getElementById('newsContainer').innerHTML = `
+    <div class="state-loading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">正在抓取并分析新闻，请稍候…</div>
+    </div>
+  `;
+}
+function showEmpty(msg) {
+  document.getElementById('newsContainer').innerHTML = `
+    <div class="state-empty">
+      <div class="state-empty-icon">🔍</div>
+      <div class="state-empty-text">${msg}</div>
+    </div>
+  `;
+}
+function showError(msg) {
+  const el = document.getElementById('errorBanner');
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+}
+function hideError() {
+  document.getElementById('errorBanner').style.display = 'none';
+}
+</script>
+</body>
+</html>
