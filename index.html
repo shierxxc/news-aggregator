@@ -417,6 +417,135 @@
       border-top: 1px solid var(--border);
     }
 
+    /* SOURCE TOGGLES */
+    .source-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .source-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      user-select: none;
+      color: var(--ink-light);
+    }
+    .source-toggle input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 14px;
+      height: 14px;
+    }
+    .source-toggle.yt { color: #c0392b; }
+    .source-toggle.bili { color: #00aeec; }
+
+    /* VIDEO CARDS */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 4px;
+    }
+    .video-card {
+      border: 1px solid var(--border);
+      background: var(--paper-dark);
+      padding: 0;
+      overflow: hidden;
+      animation: fadeIn 0.4s ease both;
+      display: flex;
+      flex-direction: column;
+    }
+    .video-thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      display: block;
+      background: var(--border);
+    }
+    .video-thumb-placeholder {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: var(--paper-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .video-body {
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .video-platform {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .video-platform.yt { color: #c0392b; }
+    .video-platform.bili { color: #00aeec; }
+    .video-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.45;
+      color: var(--ink);
+      text-decoration: none;
+      display: block;
+    }
+    .video-title:hover { color: var(--accent); }
+    .video-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+    .video-channel {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--ink-faint);
+    }
+    .video-date {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--ink-faint);
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 24px;
+    }
+    .tab {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--ink-faint);
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.15s;
+    }
+    .tab.active {
+      color: var(--ink);
+      border-bottom-color: var(--accent);
+    }
+    .tab:hover { color: var(--ink); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
     /* FOOTER */
     footer {
       text-align: center;
@@ -476,6 +605,16 @@
       <button class="btn btn-fetch" onclick="fetchNews()">▶ 获取新闻</button>
     </div>
 
+    <!-- 来源选择 -->
+    <div class="control-group">
+      <div class="control-label">数据来源</div>
+      <div class="source-toggles">
+        <label class="source-toggle"><input type="checkbox" id="srcNews" checked /> 新闻</label>
+        <label class="source-toggle yt"><input type="checkbox" id="srcYoutube" checked /> YouTube</label>
+        <label class="source-toggle bili"><input type="checkbox" id="srcBilibili" /> B站</label>
+      </div>
+    </div>
+
     <!-- 设置 -->
     <div class="control-group">
       <div class="control-label">&nbsp;</div>
@@ -485,7 +624,7 @@
 
   <main class="main">
     <div id="errorBanner" class="error-banner" style="display:none"></div>
-    <div id="newsContainer">
+    <div id="mainContent">
       <div class="state-empty">
         <div class="state-empty-icon">📰</div>
         <div class="state-empty-text">
@@ -495,7 +634,7 @@
     </div>
   </main>
 
-  <footer>简报 · 数据来源：Google News &amp; NewsAPI · 摘要由 Gemini AI 生成</footer>
+  <footer>简报 · 数据来源：Google News / YouTube / Bilibili · 摘要由 Gemini AI 生成</footer>
 
   <!-- 设置弹窗 -->
   <div class="modal-overlay" id="settingsModal" onclick="closeSettingsOutside(event)">
@@ -550,7 +689,7 @@ function renderTags() {
   const el = document.getElementById('kwTags');
   el.innerHTML = keywords.map((kw, i) => `
     <div class="tag">
-      ${kw}
+      ${escHtml(kw)}
       <span class="tag-remove" onclick="removeKeyword(${i})">✕</span>
     </div>
   `).join('');
@@ -568,6 +707,9 @@ function removeKeyword(i) {
   keywords.splice(i, 1);
   localStorage.setItem('jb_keywords', JSON.stringify(keywords));
   renderTags();
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ─── 设置弹窗 ────────────────────────────────────────
@@ -597,93 +739,174 @@ function saveNewsApiKey() {
   localStorage.setItem('jb_newsapi_key', v);
 }
 
-// ─── 核心：获取新闻 ───────────────────────────────────
+// ─── Tab 切换 ─────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+}
+
+// ─── 核心：获取所有内容 ───────────────────────────────
 async function fetchNews() {
-  if (!keywords.length) {
-    showError('请先添加至少一个关键词');
-    return;
-  }
-  if (!geminiKey) {
-    showError('请先在「设置」中填写 Gemini API Key');
-    openSettings();
-    return;
-  }
+  if (!keywords.length) { showError('请先添加至少一个关键词'); return; }
+  if (!geminiKey) { showError('请先在「设置」中填写 Gemini API Key'); openSettings(); return; }
 
   const days = parseInt(document.getElementById('timeRange').value);
+  const wantNews = document.getElementById('srcNews').checked;
+  const wantYT = document.getElementById('srcYoutube').checked;
+  const wantBili = document.getElementById('srcBilibili').checked;
+
   showLoading();
   hideError();
 
   try {
-    // 1. 从 Google News RSS 抓取（通过 allorigins 代理）
-    let allArticles = [];
-    for (const kw of keywords) {
-      const articles = await fetchGoogleNews(kw, days);
-      allArticles = allArticles.concat(articles.map(a => ({...a, keyword: kw})));
-    }
-
-    // 2. 如果有 NewsAPI key，也抓取
-    if (newsapiKey) {
-      for (const kw of keywords) {
-        const articles = await fetchNewsAPI(kw, days);
-        allArticles = allArticles.concat(articles.map(a => ({...a, keyword: kw})));
-      }
-    }
-
-    if (!allArticles.length) {
-      showEmpty('未找到相关新闻，请尝试更换关键词或扩大时间范围');
-      return;
-    }
-
-    // 3. 用 Gemini 去重聚合生成摘要
-    const grouped = await groupAndSummarize(allArticles, days);
-    renderNews(grouped);
-
+    const [newsGroups, videos] = await Promise.all([
+      wantNews ? fetchAndGroupNews(days) : Promise.resolve([]),
+      fetchVideos(days, wantYT, wantBili)
+    ]);
+    renderAll(newsGroups, videos, days, wantNews, wantYT || wantBili);
   } catch (err) {
     console.error(err);
     showError('获取失败：' + err.message);
   }
 }
 
-// ─── Google News RSS ──────────────────────────────────
+// ─── 新闻抓取 ─────────────────────────────────────────
+async function fetchAndGroupNews(days) {
+  let allArticles = [];
+  for (const kw of keywords) {
+    const a = await fetchGoogleNews(kw, days);
+    allArticles = allArticles.concat(a.map(x => ({...x, keyword: kw})));
+  }
+  if (newsapiKey) {
+    for (const kw of keywords) {
+      const a = await fetchNewsAPI(kw, days);
+      allArticles = allArticles.concat(a.map(x => ({...x, keyword: kw})));
+    }
+  }
+  if (!allArticles.length) return [];
+  return groupAndSummarize(allArticles, days);
+}
+
 async function fetchGoogleNews(keyword, days) {
-  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=zh-CN&gl=CN&ceid=CN:zh-Hans`;
-  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-  const res = await fetch(proxy);
-  const data = await res.json();
-  const parser = new DOMParser();
-  const xml = parser.parseFromString(data.contents, 'text/xml');
-  const items = xml.querySelectorAll('item');
-  const cutoff = Date.now() - days * 86400000;
-  const articles = [];
-  items.forEach(item => {
-    const pubDate = new Date(item.querySelector('pubDate')?.textContent || 0);
-    if (pubDate.getTime() < cutoff) return;
-    const title = item.querySelector('title')?.textContent || '';
-    const link = item.querySelector('link')?.textContent || '';
-    const source = item.querySelector('source')?.textContent || 'Google News';
-    articles.push({ title, link, source, publishedAt: pubDate.toISOString() });
-  });
-  return articles.slice(0, 15);
+  try {
+    const url = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=zh-CN&gl=CN&ceid=CN:zh-Hans`;
+    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxy);
+    const data = await res.json();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(data.contents, 'text/xml');
+    const items = xml.querySelectorAll('item');
+    const cutoff = Date.now() - days * 86400000;
+    const articles = [];
+    items.forEach(item => {
+      const pubDate = new Date(item.querySelector('pubDate')?.textContent || 0);
+      if (pubDate.getTime() < cutoff) return;
+      articles.push({
+        title: item.querySelector('title')?.textContent || '',
+        link: item.querySelector('link')?.textContent || '',
+        source: item.querySelector('source')?.textContent || 'Google News',
+        publishedAt: pubDate.toISOString()
+      });
+    });
+    return articles.slice(0, 15);
+  } catch(e) { return []; }
 }
 
-// ─── NewsAPI ──────────────────────────────────────────
 async function fetchNewsAPI(keyword, days) {
-  const from = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
-  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(keyword)}&from=${from}&sortBy=publishedAt&pageSize=10&apiKey=${newsapiKey}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.status !== 'ok') return [];
-  return (data.articles || []).map(a => ({
-    title: a.title,
-    link: a.url,
-    source: a.source?.name || 'NewsAPI',
-    publishedAt: a.publishedAt
-  }));
+  try {
+    const from = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
+    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(keyword)}&from=${from}&sortBy=publishedAt&pageSize=10&apiKey=${newsapiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.status !== 'ok') return [];
+    return (data.articles || []).map(a => ({
+      title: a.title, link: a.url,
+      source: a.source?.name || 'NewsAPI', publishedAt: a.publishedAt
+    }));
+  } catch(e) { return []; }
 }
 
-// ─── Gemini 去重聚合 ──────────────────────────────────
+// ─── 视频抓取 ─────────────────────────────────────────
+async function fetchVideos(days, wantYT, wantBili) {
+  const cutoff = Date.now() - days * 86400000;
+  let all = [];
+
+  for (const kw of keywords) {
+    if (wantYT) {
+      const ytVideos = await fetchYouTubeVideos(kw, cutoff);
+      all = all.concat(ytVideos);
+    }
+    if (wantBili) {
+      const biliVideos = await fetchBiliVideos(kw, cutoff);
+      all = all.concat(biliVideos);
+    }
+  }
+
+  // 按时间倒序
+  all.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+  return all;
+}
+
+async function fetchYouTubeVideos(keyword, cutoff) {
+  try {
+    // YouTube search RSS via allorigins proxy
+    const url = `https://www.youtube.com/feeds/videos.xml?q=${encodeURIComponent(keyword)}`;
+    // YouTube doesn't have a search RSS, use invidious public API instead
+    const invRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(keyword)}&type=video&sort_by=upload_date`)}`);
+    const invData = await invRes.json();
+    const items = JSON.parse(invData.contents || '[]');
+    return items
+      .filter(v => v.type === 'video')
+      .map(v => ({
+        platform: 'youtube',
+        keyword,
+        title: v.title,
+        url: `https://www.youtube.com/watch?v=${v.videoId}`,
+        channel: v.author,
+        thumbnail: v.videoThumbnails?.[0]?.url || '',
+        publishedAt: new Date(v.published * 1000).toISOString()
+      }))
+      .filter(v => new Date(v.publishedAt).getTime() >= cutoff)
+      .slice(0, 8);
+  } catch(e) { return []; }
+}
+
+async function fetchBiliVideos(keyword, cutoff) {
+  try {
+    const url = `https://search.bilibili.com/all?keyword=${encodeURIComponent(keyword)}&order=pubdate&duration=0&tids=0`;
+    // Use RSSHub for Bilibili search
+    const rssUrl = `https://rsshub.app/bilibili/search/${encodeURIComponent(keyword)}?order=pubdate&category=0&duration=0`;
+    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+    const res = await fetch(proxy);
+    const data = await res.json();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(data.contents, 'text/xml');
+    const items = xml.querySelectorAll('item');
+    const videos = [];
+    items.forEach(item => {
+      const pubDate = new Date(item.querySelector('pubDate')?.textContent || 0);
+      if (pubDate.getTime() < cutoff) return;
+      const title = item.querySelector('title')?.textContent || '';
+      const link = item.querySelector('link')?.textContent || '';
+      // Try to get author from description or source
+      const desc = item.querySelector('description')?.textContent || '';
+      const authorMatch = desc.match(/UP主[：:]\s*([^\s<]+)/);
+      videos.push({
+        platform: 'bilibili',
+        keyword,
+        title,
+        url: link,
+        channel: authorMatch ? authorMatch[1] : 'B站',
+        thumbnail: '',
+        publishedAt: pubDate.toISOString()
+      });
+    });
+    return videos.slice(0, 8);
+  } catch(e) { return []; }
+}
+
+// ─── Gemini 去重聚合（仅用于新闻）────────────────────
 async function groupAndSummarize(articles, days) {
-  // 按关键词分组
   const byKeyword = {};
   articles.forEach(a => {
     if (!byKeyword[a.keyword]) byKeyword[a.keyword] = [];
@@ -710,15 +933,7 @@ ${articleList}
 4. 每组保留所有来源链接
 
 请严格按照以下JSON格式返回，不要有其他文字：
-[
-  {
-    "headline": "聚合标题",
-    "summary": "中文摘要内容",
-    "sources": [
-      {"name": "来源名", "url": "链接", "date": "日期"}
-    ]
-  }
-]`;
+[{"headline":"聚合标题","summary":"中文摘要内容","sources":[{"name":"来源名","url":"链接","date":"日期"}]}]`;
 
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
@@ -732,74 +947,88 @@ ${articleList}
       const data = await res.json();
       if (data.error) throw new Error(data.error.message);
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
-      const clean = text.replace(/```json|```/g, '').trim();
-      const groups = JSON.parse(clean);
+      const groups = JSON.parse(text.replace(/```json|```/g, '').trim());
       groups.forEach(g => results.push({ ...g, keyword: kw }));
     } catch (e) {
-      // Gemini失败则直接显示原始标题
       arts.forEach(a => results.push({
-        headline: a.title,
-        summary: '',
+        headline: a.title, summary: '',
         sources: [{ name: a.source, url: a.link, date: new Date(a.publishedAt).toLocaleDateString('zh-CN') }],
         keyword: kw
       }));
     }
   }
-
   return results;
 }
 
-// ─── 渲染 ─────────────────────────────────────────────
-function renderNews(groups) {
-  const container = document.getElementById('newsContainer');
-  if (!groups.length) {
-    showEmpty('未找到相关新闻');
-    return;
-  }
-
+// ─── 渲染全部内容 ─────────────────────────────────────
+function renderAll(newsGroups, videos, days, showNews, showVideo) {
+  const container = document.getElementById('mainContent');
   const timeLabel = document.getElementById('timeRange').options[document.getElementById('timeRange').selectedIndex].text;
 
+  const tabs = [];
+  if (showNews) tabs.push({ id: 'news', label: `新闻摘要 (${newsGroups.length})` });
+  if (showVideo) tabs.push({ id: 'video', label: `视频 (${videos.length})` });
+
+  if (!tabs.length) { container.innerHTML = '<div class="state-empty"><div class="state-empty-icon">⚙</div><div class="state-empty-text">请至少选择一个数据来源</div></div>'; return; }
+
   container.innerHTML = `
-    <div class="section-header">
-      <div class="section-title">新闻摘要</div>
-      <div class="section-count">${timeLabel} · 共 ${groups.length} 条</div>
+    <div class="tabs">
+      ${tabs.map((t, i) => `<button class="tab${i===0?' active':''}" data-tab="${t.id}" onclick="switchTab('${t.id}')">${t.label}</button>`).join('')}
+      <span style="margin-left:auto;font-family:var(--mono);font-size:0.65rem;color:var(--ink-faint);align-self:center">${timeLabel}</span>
     </div>
-    <div class="news-grid">
-      ${groups.map((g, i) => `
-        <div class="news-card" style="animation-delay:${i * 0.05}s">
-          <div>
-            <div class="news-keyword-badge"># ${g.keyword}</div>
-            <div class="news-headline">${g.headline}</div>
-            ${g.summary ? `<div class="news-summary">${g.summary}</div>` : ''}
-            <div class="news-sources">
-              ${g.sources.map(s => `
-                <a class="source-link" href="${s.url}" target="_blank" rel="noopener">
-                  ${s.name}${s.date ? ' · ' + s.date : ''}
-                </a>
-              `).join('')}
+
+    ${showNews ? `
+    <div class="tab-panel${tabs[0].id==='news'?' active':''}" id="panel-news">
+      ${newsGroups.length ? `
+        <div class="news-grid">
+          ${newsGroups.map((g, i) => `
+            <div class="news-card" style="animation-delay:${i*0.05}s">
+              <div>
+                <div class="news-keyword-badge"># ${escHtml(g.keyword)}</div>
+                <div class="news-headline">${escHtml(g.headline)}</div>
+                ${g.summary ? `<div class="news-summary">${escHtml(g.summary)}</div>` : ''}
+                <div class="news-sources">
+                  ${g.sources.map(s => `<a class="source-link" href="${escHtml(s.url)}" target="_blank" rel="noopener">${escHtml(s.name)}${s.date?' · '+escHtml(s.date):''}</a>`).join('')}
+                </div>
+              </div>
+              <div class="news-meta">${g.sources.length} 个来源</div>
             </div>
-          </div>
-          <div class="news-meta">${g.sources.length} 个来源</div>
+          `).join('')}
         </div>
-      `).join('')}
-    </div>
+      ` : '<div class="state-empty"><div class="state-empty-icon">🔍</div><div class="state-empty-text">未找到相关新闻</div></div>'}
+    </div>` : ''}
+
+    ${showVideo ? `
+    <div class="tab-panel${tabs[0].id==='video'?' active':''}" id="panel-video">
+      ${videos.length ? `
+        <div class="video-grid">
+          ${videos.map((v, i) => `
+            <div class="video-card" style="animation-delay:${i*0.04}s">
+              ${v.thumbnail
+                ? `<img class="video-thumb" src="${escHtml(v.thumbnail)}" loading="lazy" onerror="this.style.display='none'" />`
+                : `<div class="video-thumb-placeholder">${v.platform==='youtube'?'▶':'📺'}</div>`}
+              <div class="video-body">
+                <div class="video-platform ${v.platform==='youtube'?'yt':'bili'}">${v.platform==='youtube'?'YouTube':'Bilibili'} · # ${escHtml(v.keyword)}</div>
+                <a class="video-title" href="${escHtml(v.url)}" target="_blank" rel="noopener">${escHtml(v.title)}</a>
+                <div class="video-meta-row">
+                  <div class="video-channel">${escHtml(v.channel)}</div>
+                  <div class="video-date">${new Date(v.publishedAt).toLocaleDateString('zh-CN')}</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div class="state-empty"><div class="state-empty-icon">🎬</div><div class="state-empty-text">未找到相关视频<br><small style="opacity:0.6">B站需要 RSSHub 服务可用</small></div></div>'}
+    </div>` : ''}
   `;
 }
 
 // ─── 工具函数 ─────────────────────────────────────────
 function showLoading() {
-  document.getElementById('newsContainer').innerHTML = `
+  document.getElementById('mainContent').innerHTML = `
     <div class="state-loading">
       <div class="loading-spinner"></div>
-      <div class="loading-text">正在抓取并分析新闻，请稍候…</div>
-    </div>
-  `;
-}
-function showEmpty(msg) {
-  document.getElementById('newsContainer').innerHTML = `
-    <div class="state-empty">
-      <div class="state-empty-icon">🔍</div>
-      <div class="state-empty-text">${msg}</div>
+      <div class="loading-text">正在抓取并分析内容，请稍候…</div>
     </div>
   `;
 }
